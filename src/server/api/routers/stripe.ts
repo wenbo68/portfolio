@@ -60,6 +60,10 @@ export const stripeRouter = createTRPCRouter({
         const session = await stripe.checkout.sessions.create({
           payment_method_types: ['card'],
           mode: 'payment',
+          // ADD THIS OBJECT TO SET THE DASHBOARD DESCRIPTION
+          payment_intent_data: {
+            description: name, // Use the same dynamic name for your records
+          },
           line_items: [
             {
               price_data: {
