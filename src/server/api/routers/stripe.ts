@@ -39,7 +39,7 @@ export const stripeRouter = createTRPCRouter({
 
       let unit_amount: number;
       let name: string;
-      let description: string;
+      // let description: string;
 
       // --- SERVER-SIDE PRICE CALCULATION ---
       const serviceName = serviceNames[serviceId];
