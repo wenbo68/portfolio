@@ -3,7 +3,7 @@ import { FaGithub, FaInstagram, FaLinkedin } from 'react-icons/fa6';
 
 export default function BotNac() {
   return (
-    <nav className="px-2 max-w-2xl h-14 border-t-1 border-gray-600 mx-auto">
+    <nav className="px-3 max-w-2xl h-14 border-t-1 border-gray-600 mx-auto">
       <div className="flex w-full h-full items-center justify-end gap-3 md:gap-3">
         <a
           href="mailto:laboratorymember008@gmail.com"

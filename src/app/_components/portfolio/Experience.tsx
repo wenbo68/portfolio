@@ -8,12 +8,12 @@ function Exp({
   place: string;
 }) {
   return (
-    <div className="flex flex-col bg-gray-900 rounded-lg p-4">
+    <div className="flex flex-col bg-gray-900 rounded p-4">
       <div className="flex justify-between">
         <span className="text-gray-300">{title}</span>
-        <span>{time}</span>
+        <span className="text-sm min-w-24 text-end">{time}</span>
       </div>
-      <span className="text-gray-500">{place}</span>
+      <span className="text-gray-500 text-sm">{place}</span>
     </div>
   );
 }

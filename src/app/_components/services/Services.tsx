@@ -7,12 +7,12 @@ export default function Services() {
         <span className="text-gray-300 text-lg font-semibold">
           Services & Pricing
         </span>
-        <span className="text-gray-500">
+        <span className="text-gray-500 text-sm">
           I make custom websites & web apps. Please click Consult to send me an
           overview of your desired product via email. Then we will discuss the
-          detailed requirements via emails, texts, or calls. You pay 50% upfront
-          and the remaining 50% upon delivery. Additional pages and revisions
-          cost $30 each.
+          detailed requirements via emails, texts, or calls. Please click Order
+          to pay 50% upfront and the remaining 50% upon delivery. Additional
+          pages and revisions cost $30 each.
         </span>
       </div>
 

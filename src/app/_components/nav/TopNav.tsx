@@ -50,11 +50,16 @@ export function TopNav() {
       style={{ transform: `translateY(${navPosition}px)` }}
     >
       <div className="max-w-7xl w-full flex items-center justify-end gap-4 sm:gap-5 md:gap-6 lg:gap-7 xl:gap-8 px-4 sm:px-5 md:px-6 lg:px-7 xl:px-8">
-        <Link href="/" className="text-sm font-semibold hover:text-blue-400">
+        <Link
+          href="/"
+          onClick={() => sessionStorage.setItem('previousPageUrl', '/')}
+          className="text-sm font-semibold hover:text-blue-400"
+        >
           Portfolio
         </Link>
         <Link
           href="/services"
+          onClick={() => sessionStorage.setItem('previousPageUrl', '/services')}
           className="text-sm font-semibold hover:text-blue-400"
         >
           Services

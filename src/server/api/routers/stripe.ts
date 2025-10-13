@@ -14,8 +14,14 @@ const priceMap = {
 
 // Define product names for clarity
 const serviceNames = {
-  basic: 'Basic: Website/Blog',
-  standard: 'Standard: Web app',
+  basic: 'Basic',
+  standard: 'Standard',
+};
+const paymentNames = {
+  upfront: 'Upfront',
+  final: 'Final',
+  revision: 'Revision',
+  page: 'Page',
 };
 
 export const stripeRouter = createTRPCRouter({
@@ -37,18 +43,17 @@ export const stripeRouter = createTRPCRouter({
 
       // --- SERVER-SIDE PRICE CALCULATION ---
       const serviceName = serviceNames[serviceId];
+      const paymentName = paymentNames[paymentType];
 
       if (paymentType === 'upfront' || paymentType === 'final') {
         unit_amount = priceMap[serviceId][paymentType] * 100; // Price in cents
-        name = `${
-          paymentType.charAt(0).toUpperCase() + paymentType.slice(1)
-        } Payment for ${serviceName}`;
-        description = `50% ${paymentType} payment for the ${serviceName} package.`;
+        name = `${serviceName} Package: ${paymentName} Payment`;
+        // description = `50% ${paymentType} payment for the ${serviceName} package.`;
       } else {
         // 'revision' or 'page'
         unit_amount = priceMap.addons[paymentType] * 100;
-        name = `Additional ${quantity}x ${paymentType}(s) for ${serviceName}`;
-        description = `Payment for ${quantity} additional ${paymentType}(s).`;
+        name = `${serviceName} Package: Additional ${paymentName} x${quantity}`;
+        // description = `Payment for ${quantity} additional ${paymentType}(s).`;
       }
 
       try {
@@ -61,7 +66,7 @@ export const stripeRouter = createTRPCRouter({
                 currency: 'usd',
                 product_data: {
                   name, // Dynamically generated name
-                  description, // Dynamic description
+                  // description, // Dynamic description
                 },
                 unit_amount, // Securely calculated on the server
               },
@@ -74,8 +79,8 @@ export const stripeRouter = createTRPCRouter({
             paymentType,
             quantity: quantity.toString(),
           },
-          success_url: `${baseUrl}/services/success?session_id={CHECKOUT_SESSION_ID}`,
-          cancel_url: `${baseUrl}/services`,
+          success_url: `${baseUrl}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
+          cancel_url: `${baseUrl}/payment/cancel`,
         });
 
         if (!session.url) {

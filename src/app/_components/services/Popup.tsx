@@ -2,8 +2,20 @@
 
 import React, { useState } from 'react';
 import { api } from '~/trpc/react';
-// import { CgSpinner } from 'react-icons/cg'; // A nice loading spinner
-import router from 'next/router';
+import { useRouter } from 'next/navigation';
+import { Dropdown } from '../Dropdown';
+// import { Dropdown } from '~/components/Dropdown'; // Assuming Dropdown is in this path
+
+// Define the shape of our payment options for the dropdown
+const paymentOptions = [
+  { value: 'upfront', label: '50% Upfront' },
+  { value: 'final', label: '50% Final' },
+  { value: 'page', label: 'Additional Pages' },
+  { value: 'revision', label: 'Additional Revisions' },
+];
+
+// Define the type for our paymentType state for better type safety
+type PaymentType = 'upfront' | 'final' | 'page' | 'revision';
 
 // Define the types for the props
 interface PaymentModalProps {
@@ -19,36 +31,37 @@ export default function Popup({
   serviceId,
   serviceName,
 }: PaymentModalProps) {
-  // State to hold the quantity for additional pages/revisions
-  const [quantity, setQuantity] = useState(1);
+  const router = useRouter();
+
+  // State for the selected dropdown option. Initialized to '' for no selection.
+  const [paymentType, setPaymentType] = useState<PaymentType | ''>('');
+  // State for the quantity, only used for pages/revisions
+  const [quantity, setQuantity] = useState(0);
 
   const { mutate: createCheckoutSession, isPending } =
     api.stripe.createCheckoutSession.useMutation({
       onSuccess: (data) => {
-        // Redirect the user to the Stripe Checkout page
         if (data.url) {
           router.push(data.url);
         }
       },
       onError: (error) => {
-        // On error, log it and maybe show a toast notification to the user
         console.error('Failed to create checkout session:', error.message);
         alert('Error: Could not initiate payment. Please try again.');
       },
     });
 
-  // A single handler function to initiate payment
-  const handlePay = (
-    paymentType: 'upfront' | 'final' | 'revision' | 'page',
-    qty: number
-  ) => {
-    // Prevent multiple clicks while loading
-    if (isPending) return;
+  // Simplified handler function that reads from state
+  const handlePay = () => {
+    // Guard against clicks when no option is selected or already processing
+    if (!paymentType || isPending) return;
 
     createCheckoutSession({
       serviceId,
       paymentType,
-      quantity: qty,
+      // Use quantity from state for addons, default to 1 for milestones
+      quantity:
+        paymentType === 'page' || paymentType === 'revision' ? quantity : 1,
     });
   };
 
@@ -57,89 +70,72 @@ export default function Popup({
     return null;
   }
 
+  const showQuantityInput =
+    paymentType === 'page' || paymentType === 'revision';
+
   return (
-    // Modal Overlay: covers the whole screen
+    // Modal Overlay
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm"
-      onClick={onClose} // Close modal if overlay is clicked
+      onClick={onClose}
     >
-      {/* Modal Content: stopPropagation prevents clicks inside from closing the modal */}
+      {/* Modal Content */}
       <div
-        className="relative flex w-full max-w-md flex-col gap-4 rounded-lg bg-gray-800 p-6 text-gray-300 shadow-xl"
+        className="flex w-full max-w-[90vw] sm:max-w-md flex-col gap-5 rounded bg-gray-900 p-5"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="flex flex-col">
-          <span className="text-lg font-bold text-white">
-            Choose Payment Option
-          </span>
-          <span className="text-sm text-gray-400">For: {serviceName}</span>
+          <span className="text-lg font-bold text-gray-300">{serviceName}</span>
         </div>
 
-        {/* Payment Options */}
-        <div className="flex flex-col gap-3">
-          {/* Option 1: Upfront Payment */}
-          <button
-            onClick={() => handlePay('upfront', 1)}
-            disabled={isPending}
-            className="w-full rounded-md bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-500 disabled:cursor-not-allowed disabled:bg-gray-600"
-          >
-            Pay 50% Upfront
-          </button>
-
-          {/* Option 2: Final Payment */}
-          <button
-            onClick={() => handlePay('final', 1)}
-            disabled={isPending}
-            className="w-full rounded-md bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-500 disabled:cursor-not-allowed disabled:bg-gray-600"
-          >
-            Pay 50% on Delivery (Final)
-          </button>
-        </div>
-
-        <hr className="border-gray-600" />
-
-        {/* Option 3: Additional Items */}
-        <div className="flex flex-col gap-3">
-          <span className="font-semibold text-white">
-            Purchase Additional Items
-          </span>
-          <div className="flex items-center gap-3">
-            <label htmlFor="quantity" className="text-sm">
-              Quantity:
+        {/* Form Content */}
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center gap-2">
+            <label className="text-sm font-semibold text-gray-400 min-w-16">
+              Payment:
             </label>
-            <input
-              type="number"
-              id="quantity"
-              min="1"
-              value={quantity}
-              onChange={(e) => setQuantity(Math.max(1, Number(e.target.value)))}
-              className="w-20 rounded-md border-gray-600 bg-gray-700 p-2 text-center text-white focus:border-blue-500 focus:ring-blue-500"
+            <Dropdown
+              options={paymentOptions}
+              value={paymentType}
+              onChange={(newValue) => setPaymentType(newValue as PaymentType)}
+              className="w-full"
             />
           </div>
-          <div className="flex gap-3">
-            <button
-              onClick={() => handlePay('page', quantity)}
-              disabled={isPending}
-              className="flex-1 rounded-md bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-500 disabled:cursor-not-allowed disabled:bg-gray-600"
-            >
-              Pay for Pages
-            </button>
-            <button
-              onClick={() => handlePay('revision', quantity)}
-              disabled={isPending}
-              className="flex-1 rounded-md bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-500 disabled:cursor-not-allowed disabled:bg-gray-600"
-            >
-              Pay for Revisions
-            </button>
-          </div>
+
+          {/* Conditionally render the quantity input */}
+          {showQuantityInput && (
+            <div className="flex items-center gap-2">
+              <label
+                htmlFor="quantity"
+                className="text-sm font-semibold text-gray-400 min-w-16"
+              >
+                Quantity:
+              </label>
+              <input
+                type="number"
+                id="quantity"
+                // min="1"
+                value={quantity}
+                onChange={(e) =>
+                  setQuantity(Math.max(1, Number(e.target.value)))
+                }
+                className="text-sm w-full rounded bg-gray-800 px-3 py-2 outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+              />
+            </div>
+          )}
         </div>
 
-        {isPending && (
-          <div className="text-center text-sm text-gray-400">
-            Redirecting to Stripe...
-          </div>
-        )}
+        {/* <hr className="border-gray-700" /> */}
+
+        {/* Single Pay Button */}
+        <button
+          onClick={handlePay}
+          disabled={!paymentType || isPending}
+          className="w-full rounded-md bg-blue-600 px-4 py-2 font-semibold text-white transition-colors hover:bg-blue-500 disabled:cursor-not-allowed disabled:bg-gray-600"
+        >
+          {isPending ? 'Processing...' : 'Pay via Stripe'}
+        </button>
       </div>
     </div>
   );

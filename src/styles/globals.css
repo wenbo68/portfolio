@@ -1,6 +1,21 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @theme {
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
-    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
+@layer base {
+  html {
+    /* On mobile screens (default), set a smaller base font size.
+       14px is a common choice. 16px * 0.875 = 14px */
+    font-size: 87.5%; /* (14 / 16) * 100 = 87.5% */
+  }
+
+  /* On sm screens (640px) and up, reset to the default base size. */
+  @media (min-width: 640px) {
+    html {
+      font-size: 100%; /* 16px */
+    }
+  }
 }

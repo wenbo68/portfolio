@@ -25,7 +25,7 @@ export default function RootLayout({
       <body className="bg-gray-950 text-gray-400">
         <TRPCReactProvider>
           <TopNav />
-          <main className="max-w-2xl mx-auto pt-8 sm:pt-12 md:pt-14 lg:pt-16 xl:pt-18 pb-12 sm:pb-16 md:pb-18 lg:pb-20 xl:pb-22 px-2">
+          <main className="max-w-2xl mx-auto pt-8 sm:pt-12 md:pt-14 lg:pt-16 xl:pt-18 pb-12 sm:pb-16 md:pb-18 lg:pb-20 xl:pb-22 px-3">
             {children}
           </main>
           <BotNav />

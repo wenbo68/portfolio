@@ -12,11 +12,11 @@ function Project({
   return (
     <Link
       href={url}
-      className="flex flex-col bg-gray-900 rounded-lg p-4 basis-0 flex-grow group"
+      className="flex flex-col bg-gray-900 rounded p-4 basis-0 flex-grow group"
     >
       {/* <Image src={imageUrl} alt={title} fill /> */}
       <span className="text-gray-300 group-hover:text-blue-400">{title}</span>
-      <span className="text-gray-500">{description}</span>
+      <span className="text-gray-500 text-sm">{description}</span>
     </Link>
   );
 }
@@ -34,7 +34,7 @@ export default function Projects() {
         <Project
           url="https://dodo-mauve.vercel.app"
           title="Dodo"
-          description="A to-do app that offers a smooth drag-and-drop experience"
+          description="Manage your todo lists using smooth drag-and-drops"
         />
       </div>
     </section>
