@@ -49,7 +49,7 @@ export default function Service({
           <div className="flex flex-col gap-1 text-sm">
             {features.map((feature, index) => (
               <div key={index} className="flex gap-2">
-                <IoIosCheckmarkCircle size={16} className="shrink-0 mt-[3px]" />
+                <IoIosCheckmarkCircle className="shrink-0 mt-0.5 w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 <span>{feature}</span>
               </div>
             ))}

@@ -1,14 +1,15 @@
-import { DrizzleAdapter } from "@auth/drizzle-adapter";
-import { type DefaultSession, type NextAuthConfig } from "next-auth";
-import DiscordProvider from "next-auth/providers/discord";
+import { DrizzleAdapter } from '@auth/drizzle-adapter';
+import { type DefaultSession, type NextAuthConfig } from 'next-auth';
+import DiscordProvider from 'next-auth/providers/discord';
+import GoogleProvider from 'next-auth/providers/google';
 
-import { db } from "~/server/db";
+import { db } from '~/server/db';
 import {
   accounts,
   sessions,
   users,
   verificationTokens,
-} from "~/server/db/schema";
+} from '~/server/db/schema';
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -16,13 +17,13 @@ import {
  *
  * @see https://next-auth.js.org/getting-started/typescript#module-augmentation
  */
-declare module "next-auth" {
+declare module 'next-auth' {
   interface Session extends DefaultSession {
     user: {
       id: string;
       // ...other properties
       // role: UserRole;
-    } & DefaultSession["user"];
+    } & DefaultSession['user'];
   }
 
   // interface User {
@@ -38,6 +39,7 @@ declare module "next-auth" {
  */
 export const authConfig = {
   providers: [
+    GoogleProvider,
     DiscordProvider,
     /**
      * ...add more providers here.

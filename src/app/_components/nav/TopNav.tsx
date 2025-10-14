@@ -1,7 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
+import { AuthShowcase } from '../auth/AuthShowcase';
+import { AuthShowcaseFallback } from '../auth/AuthShowcaseFallback';
 
 export function TopNav() {
   const [lastScrollY, setLastScrollY] = useState(0);
@@ -49,21 +51,28 @@ export function TopNav() {
       className="flex justify-center w-full h-12 bg-gray-900 sticky top-0 z-50 transition-transform duration-0"
       style={{ transform: `translateY(${navPosition}px)` }}
     >
-      <div className="max-w-7xl w-full flex items-center justify-end gap-4 sm:gap-5 md:gap-6 lg:gap-7 xl:gap-8 px-4 sm:px-5 md:px-6 lg:px-7 xl:px-8">
-        <Link
-          href="/"
-          onClick={() => sessionStorage.setItem('previousPageUrl', '/')}
-          className="text-sm font-semibold hover:text-blue-400"
-        >
-          Portfolio
-        </Link>
-        <Link
-          href="/services"
-          onClick={() => sessionStorage.setItem('previousPageUrl', '/services')}
-          className="text-sm font-semibold hover:text-blue-400"
-        >
-          Services
-        </Link>
+      <div className="max-w-7xl w-full flex items-center justify-between px-3 sm:px-3 md:px-4 lg:px-5 xl:px-6">
+        <div className="h-full flex items-center gap-4 sm:gap-5 md:gap-6 lg:gap-7 xl:gap-8">
+          <Link
+            href="/"
+            onClick={() => sessionStorage.setItem('previousPageUrl', '/')}
+            className="flex items-center text-center text-sm font-semibold hover:text-blue-400"
+          >
+            Portfolio
+          </Link>
+          <Link
+            href="/services"
+            onClick={() =>
+              sessionStorage.setItem('previousPageUrl', '/services')
+            }
+            className="flex items-center text-center text-sm font-semibold hover:text-blue-400"
+          >
+            Services
+          </Link>
+        </div>
+        <Suspense fallback={<AuthShowcaseFallback />}>
+          <AuthShowcase />
+        </Suspense>
       </div>
     </nav>
   );

@@ -6,6 +6,7 @@ import { Geist } from 'next/font/google';
 import { TRPCReactProvider } from '~/trpc/react';
 import { TopNav } from './_components/nav/TopNav';
 import BotNav from './_components/nav/BotNav';
+import { ContextProviders } from './_contexts/ContextProviders';
 
 export const metadata: Metadata = {
   title: 'Wenbo Liu',
@@ -23,13 +24,13 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${geist.variable}`}>
       <body className="bg-gray-950 text-gray-400">
-        <TRPCReactProvider>
+        <ContextProviders>
           <TopNav />
           <main className="max-w-2xl mx-auto pt-8 sm:pt-12 md:pt-14 lg:pt-16 xl:pt-18 pb-12 sm:pb-16 md:pb-18 lg:pb-20 xl:pb-22 px-3">
             {children}
           </main>
           <BotNav />
-        </TRPCReactProvider>
+        </ContextProviders>
       </body>
     </html>
   );

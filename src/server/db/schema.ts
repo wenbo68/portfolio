@@ -1,5 +1,5 @@
 import { relations, sql } from 'drizzle-orm';
-import { index, pgTableCreator, primaryKey } from 'drizzle-orm/pg-core';
+import { index, pgEnum, pgTableCreator, primaryKey } from 'drizzle-orm/pg-core';
 import { type AdapterAccount } from 'next-auth/adapters';
 
 /**
@@ -10,26 +10,8 @@ import { type AdapterAccount } from 'next-auth/adapters';
  */
 export const createTable = pgTableCreator((name) => `portfolio_${name}`);
 
-// export const posts = createTable(
-//   "post",
-//   (d) => ({
-//     id: d.integer().primaryKey().generatedByDefaultAsIdentity(),
-//     name: d.varchar({ length: 256 }),
-//     createdById: d
-//       .varchar({ length: 255 })
-//       .notNull()
-//       .references(() => users.id),
-//     createdAt: d
-//       .timestamp({ withTimezone: true })
-//       .default(sql`CURRENT_TIMESTAMP`)
-//       .notNull(),
-//     updatedAt: d.timestamp({ withTimezone: true }).$onUpdate(() => new Date()),
-//   }),
-//   (t) => [
-//     index("created_by_idx").on(t.createdById),
-//     index("name_idx").on(t.name),
-//   ]
-// );
+// ENUM for package types to ensure data consistency
+export const packageEnum = pgEnum('package', ['basic', 'standard']);
 
 export const users = createTable('user', (d) => ({
   id: d
@@ -50,6 +32,40 @@ export const users = createTable('user', (d) => ({
 
 export const usersRelations = relations(users, ({ many }) => ({
   accounts: many(accounts),
+  // A user can have many reviews
+  reviews: many(reviews),
+}));
+
+// NEW TABLE: Reviews
+// This table will store all the reviews submitted by users.
+export const reviews = createTable(
+  'review',
+  (d) => ({
+    id: d
+      .varchar({ length: 255 })
+      .notNull()
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    comment: d.text().notNull(),
+    rating: d.integer().notNull(), // Rating from 1 to 5
+    websiteUrl: d.varchar({ length: 255 }),
+    package: packageEnum('package').notNull(), // 'basic' or 'standard'
+    userId: d
+      .varchar({ length: 255 })
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }), // Cascade deletes reviews if a user is deleted
+    createdAt: d
+      .timestamp({ mode: 'date', withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  }),
+  (t) => [index('review_user_id_idx').on(t.userId)]
+);
+
+// Relation for the new reviews table
+export const reviewsRelations = relations(reviews, ({ one }) => ({
+  // Each review belongs to one user
+  user: one(users, { fields: [reviews.userId], references: [users.id] }),
 }));
 
 export const accounts = createTable(

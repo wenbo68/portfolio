@@ -5,7 +5,7 @@ import Projects from './_components/portfolio/Projects';
 
 export default async function Home() {
   return (
-    <div className="flex flex-col gap-5 sm:gap-9 md:gap-11 lg:gap-13 xl:gap-15">
+    <div className="flex flex-col gap-7 sm:gap-9 md:gap-11 lg:gap-13 xl:gap-15">
       <Intro />
       <Projects />
       <Experience />
