@@ -132,7 +132,7 @@ export default function Popup({
         <button
           onClick={handlePay}
           disabled={!paymentType || isPending}
-          className="w-full rounded-md bg-blue-600 px-4 py-2 font-semibold text-gray-300 transition-colors hover:bg-blue-500 disabled:cursor-not-allowed disabled:bg-blue-600 cursor-pointer"
+          className="w-full rounded-md bg-blue-600/50 px-4 py-2 font-semibold text-gray-300 transition-colors hover:bg-blue-500/50 disabled:cursor-not-allowed disabled:bg-blue-600/50 cursor-pointer"
         >
           {isPending ? 'Processing...' : 'Pay via Stripe'}
         </button>

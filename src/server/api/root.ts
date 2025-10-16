@@ -1,5 +1,6 @@
 import { createCallerFactory, createTRPCRouter } from '~/server/api/trpc';
 import { stripeRouter } from './routers/stripe';
+import { commentRouter } from './routers/comment';
 
 /**
  * This is the primary router for your server.
@@ -8,6 +9,7 @@ import { stripeRouter } from './routers/stripe';
  */
 export const appRouter = createTRPCRouter({
   // post: postRouter,
+  comment: commentRouter,
   stripe: stripeRouter,
 });
 

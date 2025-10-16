@@ -3,7 +3,7 @@ import Service from './Service';
 export default function Services() {
   return (
     <section className="flex flex-col gap-5">
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-0">
         <span className="text-gray-300 text-lg font-semibold">Services</span>
         <span className="text-gray-500 text-sm">
           I make custom websites & web apps. Please click Consult to send me an

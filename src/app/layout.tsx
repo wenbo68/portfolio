@@ -36,4 +36,5 @@ export default function RootLayout({
   );
 }
 
-// just add pay popup and make it call the trpc mutation
+// add edit and delete for review
+// add half star

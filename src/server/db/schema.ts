@@ -1,5 +1,11 @@
 import { relations, sql } from 'drizzle-orm';
-import { index, pgEnum, pgTableCreator, primaryKey } from 'drizzle-orm/pg-core';
+import {
+  index,
+  pgEnum,
+  pgTableCreator,
+  primaryKey,
+  type AnyPgColumn,
+} from 'drizzle-orm/pg-core';
 import { type AdapterAccount } from 'next-auth/adapters';
 
 /**
@@ -32,40 +38,59 @@ export const users = createTable('user', (d) => ({
 
 export const usersRelations = relations(users, ({ many }) => ({
   accounts: many(accounts),
-  // A user can have many reviews
-  reviews: many(reviews),
+  // A user can have many comments
+  comments: many(comments),
 }));
 
-// NEW TABLE: Reviews
-// This table will store all the reviews submitted by users.
-export const reviews = createTable(
-  'review',
+// RENAMED TABLE: from 'review' to 'comment'
+// This table will store all top-level reviews and their nested replies.
+export const comments = createTable(
+  'comment',
   (d) => ({
     id: d
       .varchar({ length: 255 })
       .notNull()
       .primaryKey()
       .$defaultFn(() => crypto.randomUUID()),
-    comment: d.text().notNull(),
-    rating: d.integer().notNull(), // Rating from 1 to 5
+    text: d.text().notNull(),
+    // These fields are nullable because replies won't have them.
+    rating: d.integer(),
     websiteUrl: d.varchar({ length: 255 }),
-    package: packageEnum('package').notNull(), // 'basic' or 'standard'
+    package: packageEnum('package'),
+    // Foreign key for user who posted
     userId: d
       .varchar({ length: 255 })
       .notNull()
-      .references(() => users.id, { onDelete: 'cascade' }), // Cascade deletes reviews if a user is deleted
+      .references(() => users.id, { onDelete: 'cascade' }),
+    // NEW: Self-referencing foreign key for nested comments
+    parentId: d
+      .varchar({ length: 255 })
+      .references((): AnyPgColumn => comments.id, { onDelete: 'cascade' }),
     createdAt: d
       .timestamp({ mode: 'date', withTimezone: true })
       .defaultNow()
       .notNull(),
   }),
-  (t) => [index('review_user_id_idx').on(t.userId)]
+  (t) => [
+    index('comment_user_id_idx').on(t.userId),
+    index('comment_parent_id_idx').on(t.parentId),
+  ]
 );
 
-// Relation for the new reviews table
-export const reviewsRelations = relations(reviews, ({ one }) => ({
-  // Each review belongs to one user
-  user: one(users, { fields: [reviews.userId], references: [users.id] }),
+// Updated relations for the comments table to handle nesting
+export const commentsRelations = relations(comments, ({ one, many }) => ({
+  // Each comment belongs to one user
+  user: one(users, { fields: [comments.userId], references: [users.id] }),
+  // Each reply belongs to one parent comment
+  parent: one(comments, {
+    fields: [comments.parentId],
+    references: [comments.id],
+    relationName: 'replies',
+  }),
+  // Each comment can have many replies
+  replies: many(comments, {
+    relationName: 'replies',
+  }),
 }));
 
 export const accounts = createTable(

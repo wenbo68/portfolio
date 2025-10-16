@@ -30,14 +30,14 @@ export default function Service({
               href={`mailto:laboratorymember008@gmail.com?subject=${
                 serviceId === 'basic' ? 'Basic' : 'Standard'
               }%20Package%3A%20Consultation`}
-              className="flex items-center justify-center basis-0 flex-grow rounded bg-blue-600 px-4 py-[7px] text-gray-300 hover:bg-blue-500 cursor-pointer text-sm font-semibold"
+              className="flex items-center justify-center basis-0 flex-grow rounded bg-blue-600/50 px-4 py-[7px] text-gray-300 hover:bg-blue-500/50 cursor-pointer text-sm font-semibold"
             >
               Consult
             </a>
             {/* This button now opens the modal */}
             <button
               onClick={() => setIsModalOpen(true)}
-              className="basis-0 flex-grow rounded bg-blue-600 px-4 py-[7px] text-gray-300 hover:bg-blue-500 cursor-pointer text-sm font-semibold"
+              className="basis-0 flex-grow rounded bg-blue-600/50 px-4 py-[7px] text-gray-300 hover:bg-blue-500/50 cursor-pointer text-sm font-semibold"
             >
               Order
             </button>

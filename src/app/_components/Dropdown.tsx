@@ -56,8 +56,7 @@ export const Dropdown = ({
         {/* Display the selected option's label, or a default */}
         <span>{selectedOption ? selectedOption.label : 'Select...'}</span>
         <IoIosArrowDown
-          size={20}
-          className={`transform transition-transform duration-200 ${
+          className={`w-5 h-5 transform transition-transform duration-200 ${
             isOpen ? 'rotate-180' : ''
           }`}
         />

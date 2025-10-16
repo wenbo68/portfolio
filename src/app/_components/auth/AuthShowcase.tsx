@@ -50,7 +50,7 @@ export function AuthShowcase() {
           const callbackUrl = `${pathname}${params ? `?${params}` : ''}`;
           signIn(undefined, { callbackUrl });
         }}
-        className="rounded bg-blue-600 hover:bg-blue-500 text-gray-300 px-4 py-2 text-sm font-semibold transition cursor-pointer"
+        className="rounded bg-blue-600/50 hover:bg-blue-500/50 text-gray-300 px-4 py-2 text-sm font-semibold transition cursor-pointer"
       >
         Login
       </button>
