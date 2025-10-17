@@ -37,4 +37,6 @@ export default function RootLayout({
 }
 
 // add edit and delete for review
+// since we have optimistic update, dont make the buttons blocking
+// debug edit/delete
 // add half star

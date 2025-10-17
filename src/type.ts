@@ -9,6 +9,7 @@ export interface Comment {
   text: string;
   createdAt: Date;
   user: User;
+  userId: string;
   parentId: string | null;
   rating?: number | null;
   websiteUrl?: string | null;
