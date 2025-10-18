@@ -21,7 +21,7 @@ type PaymentType = 'upfront' | 'final' | 'page' | 'revision';
 interface PaymentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  serviceId: 'basic' | 'standard';
+  serviceId: PackageType;
   serviceName: string;
 }
 

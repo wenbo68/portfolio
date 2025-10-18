@@ -7,12 +7,11 @@ import {
 import { comments, packageEnum } from '~/server/db/schema';
 import { TRPCError } from '@trpc/server';
 import { eq } from 'drizzle-orm';
+import type { CommentTree } from '~/type';
 
 export const commentRouter = createTRPCRouter({
-  /**
-   * Fetches all comments.
-   */
-  getAll: publicProcedure.query(async ({ ctx }) => {
+  getAllAsTree: publicProcedure.query(async ({ ctx }) => {
+    // 1. Fetch all comments as a flat list, just like before
     const allComments = await ctx.db.query.comments.findMany({
       with: {
         user: {
@@ -24,14 +23,39 @@ export const commentRouter = createTRPCRouter({
       },
       orderBy: (comments, { desc }) => [desc(comments.createdAt)],
     });
-    return allComments;
+
+    // 2. Create a map for efficient O(1) lookups and nest the comments
+    const commentMap = new Map<string, CommentTree>();
+    const nestedComments: CommentTree[] = [];
+
+    // First pass: Initialize all comments in the map and add a 'replies' array
+    for (const comment of allComments) {
+      commentMap.set(comment.id, { ...comment, replies: [] });
+    }
+
+    // Second pass: Build the nested structure
+    for (const comment of allComments) {
+      const commentNode = commentMap.get(comment.id)!; // We know it exists from the first pass
+
+      if (comment.parentId) {
+        const parentNode = commentMap.get(comment.parentId);
+        if (parentNode) {
+          // It's a reply, push it into its parent's 'replies' array
+          parentNode.replies.push(commentNode);
+        }
+      } else {
+        // It's a top-level comment
+        nestedComments.push(commentNode);
+      }
+    }
+
+    return nestedComments;
   }),
 
   /**
    * Adds a new comment or reply.
    */
   add: protectedProcedure
-    // ... (your existing 'add' procedure is perfect, no changes needed)
     .input(
       z.object({
         text: z.string().min(1, 'Comment cannot be empty.'),

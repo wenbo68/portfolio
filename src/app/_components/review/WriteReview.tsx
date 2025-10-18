@@ -1,109 +1,186 @@
 'use client';
 
-import { useState } from 'react';
+import {
+  useState,
+  type Dispatch,
+  type FormEvent,
+  type SetStateAction,
+} from 'react';
 import { useSession } from 'next-auth/react';
 import { api } from '~/trpc/react';
 import StarRating from './StarRating';
 import { Dropdown } from '../Dropdown';
 import type { AppRouter } from '~/server/api/root';
 import type { inferRouterOutputs } from '@trpc/server';
+import type { PackageType } from '~/server/db/schema';
+import type { updateCommentInput } from '~/type';
+import { addCommentToTree } from '~/app/_utils/comment';
 
-// Define a type for the tRPC utils
 type RouterOutput = inferRouterOutputs<AppRouter>;
-type TRPCUtils = ReturnType<typeof api.useUtils>;
 
-export default function WriteReview({ utils }: { utils: TRPCUtils }) {
+interface UpdateReviewFields {
+  id: string;
+  package: PackageType;
+  rating: number;
+  websiteUrl: string;
+  text: string;
+  setIsEditing: Dispatch<SetStateAction<boolean>>;
+  handleUpdate: ({
+    e,
+    id,
+    type,
+    selectedPackage,
+    rating,
+    websiteUrl,
+    text,
+  }: updateCommentInput) => void;
+}
+
+type WriteReviewProps = {
+  setError: Dispatch<SetStateAction<string>>;
+  updateInput?: UpdateReviewFields;
+};
+
+export default function WriteReview({
+  setError,
+  updateInput,
+}: WriteReviewProps) {
   const { data: session } = useSession();
-  const [rating, setRating] = useState(0);
-  const [text, setText] = useState('');
-  const [websiteUrl, setWebsiteUrl] = useState('');
-  const [selectedPackage, setSelectedPackage] = useState<'basic' | 'standard'>(
-    'basic'
-  );
-  const [error, setError] = useState('');
+  const utils = api.useUtils();
 
-  const addReviewMutation = api.comment.add.useMutation({
+  const [selectedPackage, setSelectedPackage] = useState<PackageType>(
+    updateInput ? updateInput.package : 'basic'
+  );
+  const [rating, setRating] = useState(updateInput ? updateInput.rating : 0);
+  const [websiteUrl, setWebsiteUrl] = useState(
+    updateInput ? updateInput.websiteUrl : ''
+  );
+  const [text, setText] = useState(updateInput ? updateInput.text : '');
+
+  const addMutation = api.comment.add.useMutation({
     // Step 1: onMutate runs before the server call
     onMutate: async (newReview) => {
       // Cancel any outgoing refetches
-      await utils.comment.getAll.cancel();
+      await utils.comment.getAllAsTree.cancel();
 
       // Snapshot the previous value
-      const previousComments = utils.comment.getAll.getData();
+      const previousComments = utils.comment.getAllAsTree.getData();
 
       // Optimistically update to the new value
       if (previousComments && session?.user) {
-        // Create the optimistic comment object
-        const optimisticReview: RouterOutput['comment']['getAll'][number] = {
-          id: `optimistic-${Date.now()}`, // Temporary ID
-          text: newReview.text,
-          rating: newReview.rating!,
-          websiteUrl: newReview.websiteUrl!,
-          package: newReview.package!,
-          parentId: null,
-          userId: session.user.id,
-          createdAt: new Date(),
-          user: {
-            name: session.user.name ?? 'You',
-            image: session.user.image ?? '',
-          },
-        };
+        // [number] to get the type of a single instance of the array return by api.comment.getAll
+        const optimisticReview: RouterOutput['comment']['getAllAsTree'][number] =
+          {
+            id: `optimistic-${Date.now()}`, // Temporary ID
+            text: newReview.text,
+            rating: newReview.rating!,
+            websiteUrl: newReview.websiteUrl!,
+            package: newReview.package!,
+            parentId: null,
+            userId: session.user.id,
+            createdAt: new Date(),
+            user: {
+              name: session.user.name ?? 'You',
+              image: session.user.image ?? '',
+            },
+            replies: [],
+          };
 
-        // Add the new review to the top of the list
-        utils.comment.getAll.setData(undefined, [
-          optimisticReview,
-          ...previousComments,
-        ]);
+        const updatedComments = addCommentToTree(
+          previousComments,
+          optimisticReview
+        );
+
+        utils.comment.getAllAsTree.setData(undefined, updatedComments);
       }
+
       // Return a context object with the snapshotted value
       return { previousComments };
     },
     // Step 2: If the mutation fails, roll back
     onError: (err, newReview, context) => {
       if (context?.previousComments) {
-        utils.comment.getAll.setData(undefined, context.previousComments);
+        utils.comment.getAllAsTree.setData(undefined, context.previousComments);
       }
-      console.error('Failed to post review:', err);
-      setError('Failed to submit review. Please try again.');
+      console.error('WriteReview addMutation onError:', err);
+      setError(err.message);
     },
-    // Step 3: Always refetch after the mutation is settled
-    onSettled: () => {
-      void utils.comment.getAll.invalidate();
-      // Clear the form on success or failure
+    onSuccess: () => {
+      // Clear the form only on a successful submission.
       setRating(0);
       setText('');
       setWebsiteUrl('');
       setSelectedPackage('basic');
     },
+    // Step 3: Always refetch after the mutation is settled
+    onSettled: () => {
+      void utils.comment.getAllAsTree.invalidate();
+    },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleAdd = (e: React.FormEvent) => {
     e.preventDefault();
-    if (rating === 0 || text.trim() === '') {
-      setError('Please provide a rating and a comment.');
+    if (rating === 0) {
+      setError('Please provide a rating.');
+      return;
+    }
+    if (websiteUrl.trim() !== '') {
+      try {
+        new URL(websiteUrl); // throws if invalid
+      } catch {
+        setError('Please provide a valid URL.');
+        return;
+      }
+    } else {
+      setError('Please provide a valid URL.');
+      return;
+    }
+    if (text.trim() === '') {
+      setError('Please provide a valid comment.');
       return;
     }
     setError('');
-    addReviewMutation.mutate({
-      text,
+    addMutation.mutate({
+      package: selectedPackage,
       rating,
       websiteUrl,
-      package: selectedPackage,
+      text,
     });
   };
 
-  if (!session) return null;
+  if (!session)
+    return (
+      <p
+        className={`bg-gray-900 ${
+          updateInput ? `` : `p-5`
+        } rounded flex flex-col gap-4 text-gray-400 text-sm`}
+      >
+        Please login first to submit a review.
+      </p>
+    );
 
   return (
     <form
-      onSubmit={handleSubmit}
-      className="bg-gray-900 p-5 rounded flex flex-col gap-4 text-gray-400 text-sm"
+      onSubmit={(e: FormEvent<Element>) =>
+        updateInput
+          ? updateInput.handleUpdate({
+              e,
+              id: updateInput.id,
+              type: 'review',
+              selectedPackage,
+              rating,
+              websiteUrl,
+              text,
+            })
+          : handleAdd(e)
+      }
+      className={`bg-gray-900 ${
+        updateInput ? `` : `p-5`
+      } rounded flex flex-col gap-4 text-gray-400 text-sm`}
     >
-      {error && <p className="text-red-400 ">{error}</p>}
-
       {/* package & rating */}
       <div className="flex flex-col sm:flex-row gap-4">
-        <div className="w-full flex flex-col  gap-1">
+        <div className="w-full flex flex-col gap-1">
           <label className="block font-medium">Package</label>
           <Dropdown
             options={[
@@ -111,12 +188,10 @@ export default function WriteReview({ utils }: { utils: TRPCUtils }) {
               { value: 'standard', label: 'Standard: Web App' },
             ]}
             value={selectedPackage}
-            onChange={(v: string) =>
-              setSelectedPackage(v as 'basic' | 'standard')
-            }
+            onChange={(v: string) => setSelectedPackage(v as PackageType)}
           />
         </div>
-        <div className="w-full flex flex-col  gap-1">
+        <div className="w-full flex flex-col gap-1">
           <span className="block font-medium">Rating</span>
           <div className="bg-gray-800 rounded px-3 py-2.5 flex items-center">
             <StarRating rating={rating} setRating={setRating} />
@@ -136,7 +211,7 @@ export default function WriteReview({ utils }: { utils: TRPCUtils }) {
         </div>
 
         <input
-          type="url"
+          type="text"
           id="websiteUrl"
           value={websiteUrl}
           onChange={(e) => setWebsiteUrl(e.target.value)}
@@ -157,20 +232,37 @@ export default function WriteReview({ utils }: { utils: TRPCUtils }) {
           onChange={(e) => setText(e.target.value)}
           placeholder="Share your experience..."
           className="w-full bg-gray-800 rounded py-2 px-3 outline-none scrollbar-hide"
-          required
         ></textarea>
       </div>
 
-      {/* submit button */}
-      <div className="flex items-center justify-end">
-        <button
-          type="submit"
-          disabled={addReviewMutation.isPending}
-          className="min-w-36 bg-blue-600/50 hover:bg-blue-500/50 text-gray-300 font-semibold py-2 px-4 rounded transition-all disabled:bg-gray-500 disabled:cursor-not-allowed cursor-pointer"
-        >
-          {addReviewMutation.isPending ? 'Submitting...' : 'Submit Review'}
-        </button>
-      </div>
+      {/* save/cancel for editing; submit button for adding*/}
+      {updateInput ? (
+        <div className="flex justify-end gap-4 text-gray-500">
+          <button
+            type="button"
+            onClick={() => {
+              updateInput.setIsEditing(false);
+              setError('');
+            }}
+            className="hover:text-gray-400"
+          >
+            Cancel
+          </button>
+          <button type="submit" className="hover:text-gray-400">
+            Save
+          </button>
+        </div>
+      ) : (
+        <div className="flex items-center justify-end">
+          <button
+            type="submit"
+            disabled={addMutation.isPending}
+            className="min-w-36 bg-blue-600/50 hover:bg-blue-500/50 text-gray-300 font-semibold py-2 px-4 rounded transition-all disabled:bg-blue-600/50 cursor-pointer"
+          >
+            {addMutation.isPending ? 'Submitting...' : 'Submit Review'}
+          </button>
+        </div>
+      )}
     </form>
   );
 }

@@ -10,7 +10,7 @@ export default function Service({
   price,
   features,
 }: {
-  serviceId: 'basic' | 'standard';
+  serviceId: PackageType;
   title: string;
   price: string;
   features: string[];

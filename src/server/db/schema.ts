@@ -18,6 +18,7 @@ export const createTable = pgTableCreator((name) => `portfolio_${name}`);
 
 // ENUM for package types to ensure data consistency
 export const packageEnum = pgEnum('package', ['basic', 'standard']);
+export type PackageType = (typeof packageEnum.enumValues)[number];
 
 export const users = createTable('user', (d) => ({
   id: d

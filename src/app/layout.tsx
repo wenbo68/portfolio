@@ -3,7 +3,6 @@ import '~/styles/globals.css';
 import { type Metadata } from 'next';
 import { Geist } from 'next/font/google';
 
-import { TRPCReactProvider } from '~/trpc/react';
 import { TopNav } from './_components/nav/TopNav';
 import BotNav from './_components/nav/BotNav';
 import { ContextProviders } from './_contexts/ContextProviders';
@@ -36,7 +35,6 @@ export default function RootLayout({
   );
 }
 
-// add edit and delete for review
-// since we have optimistic update, dont make the buttons blocking
-// debug edit/delete
-// add half star
+// add pagination for comments
+// add filter for comments (order, rating, package)
+// allow admin to pin comments to top

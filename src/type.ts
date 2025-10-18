@@ -1,18 +1,31 @@
-// --- TYPES ---
-export interface User {
-  name?: string | null;
-  image?: string | null;
-}
+import type { comments, PackageType } from './server/db/schema';
 
-export interface Comment {
+type CommentAndUser = typeof comments.$inferSelect & {
+  user: {
+    name: string | null;
+    image: string | null;
+  };
+};
+
+export type CommentTree = CommentAndUser & {
+  replies: CommentTree[];
+};
+
+export type updateCommentInput = {
+  e: React.FormEvent;
   id: string;
   text: string;
-  createdAt: Date;
-  user: User;
-  userId: string;
-  parentId: string | null;
-  rating?: number | null;
-  websiteUrl?: string | null;
-  package?: 'basic' | 'standard' | null;
-  replies?: Comment[];
-}
+} & (
+  | {
+      type: 'review';
+      selectedPackage: PackageType;
+      rating: number;
+      websiteUrl: string;
+    }
+  | {
+      type: 'reply';
+      selectedPackage: undefined;
+      rating: undefined;
+      websiteUrl: undefined;
+    }
+);
