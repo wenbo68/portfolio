@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { IoIosCheckmarkCircle } from 'react-icons/io';
 import Popup from './Popup';
+import type { PackageType } from '~/server/db/schema';
 
 export default function Service({
   serviceId,

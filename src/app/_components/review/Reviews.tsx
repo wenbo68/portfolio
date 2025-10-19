@@ -1,9 +1,8 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { api } from '~/trpc/react';
 import StarRating from './StarRating';
-// import type { Comment } from '~/type';
 import ReviewOrReply from './ReviewOrReply';
 import WriteReview from './WriteReview';
 
@@ -11,33 +10,6 @@ export default function Reviews() {
   const { data: commentTree } = api.comment.getAllAsTree.useQuery();
 
   const [error, setError] = useState('');
-
-  // const nestedComments = useMemo(() => {
-  //   if (!comments) return [];
-
-  //   const commentMap: Record<string, Comment> = {};
-  //   comments.forEach((comment) => {
-  //     // Ensure replies array exists for every comment
-  //     commentMap[comment.id] = { ...comment, replies: [] };
-  //   });
-
-  //   const result: Comment[] = [];
-  //   comments.forEach((comment) => {
-  //     if (comment.parentId) {
-  //       const parent = commentMap[comment.parentId];
-  //       const child = commentMap[comment.id];
-  //       if (parent && child && parent.replies) {
-  //         parent.replies.push(child);
-  //       }
-  //     } else {
-  //       const top = commentMap[comment.id];
-  //       if (top) {
-  //         result.push(top);
-  //       }
-  //     }
-  //   });
-  //   return result;
-  // }, [comments]);
 
   if (!commentTree) return null;
 

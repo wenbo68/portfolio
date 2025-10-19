@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { api } from '~/trpc/react';
 import { useRouter } from 'next/navigation';
 import { Dropdown } from '../Dropdown';
-// import { Dropdown } from '~/components/Dropdown'; // Assuming Dropdown is in this path
+import type { PackageType } from '~/server/db/schema';
 
 // Define the shape of our payment options for the dropdown
 const paymentOptions = [
