@@ -6,6 +6,8 @@ import { Geist } from 'next/font/google';
 import { TopNav } from './_components/nav/TopNav';
 import BotNav from './_components/nav/BotNav';
 import { ContextProviders } from './_contexts/ContextProviders';
+import { Suspense } from 'react';
+import { Toaster } from 'react-hot-toast';
 
 export const metadata: Metadata = {
   title: 'Wenbo Liu',
@@ -23,18 +25,19 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${geist.variable}`}>
       <body className="bg-gray-950 text-gray-400">
-        <ContextProviders>
-          <TopNav />
-          <main className="max-w-2xl mx-auto pt-8 sm:pt-12 md:pt-14 lg:pt-16 xl:pt-18 pb-12 sm:pb-16 md:pb-18 lg:pb-20 xl:pb-22 px-3">
-            {children}
-          </main>
-          <BotNav />
-        </ContextProviders>
+        <Suspense fallback={null}>
+          <ContextProviders>
+            <TopNav />
+            <main className="max-w-2xl mx-auto pt-8 sm:pt-12 md:pt-14 lg:pt-16 xl:pt-18 pb-12 sm:pb-16 md:pb-18 lg:pb-20 xl:pb-22 px-3">
+              {children}
+            </main>
+            <Toaster position="bottom-center" />
+            <BotNav />
+          </ContextProviders>
+        </Suspense>
       </body>
     </html>
   );
 }
 
-// add pagination for comments
-// add filter for comments (order, rating, package)
 // allow admin to pin comments to top
