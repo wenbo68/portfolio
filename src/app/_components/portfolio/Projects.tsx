@@ -27,8 +27,8 @@ export default function Projects() {
       <span className="text-gray-300 text-lg font-semibold">Projects</span>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 lg:gap-4">
         <Project
-          url="https://www.showplayer.net"
-          title="Tonytonyshopper"
+          url="https://github.com/wenbo68/tonytonyshopper"
+          title="TonyTonyShopper"
           description="(Ongoing) personal/small-scale E-commerce website"
         />
         <Project
