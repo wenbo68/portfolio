@@ -28,6 +28,11 @@ export default function Projects() {
       <div className="flex gap-2 lg:gap-4">
         <Project
           url="https://www.showplayer.net"
+          title="Tonytonyshopper"
+          description="(Ongoing) personal/small-scale E-commerce website"
+        />
+        <Project
+          url="https://www.showplayer.net"
           title="Showplayer"
           description="Stream movies and tv shows without popups"
         />

@@ -1,3 +1,5 @@
+'use client';
+
 import { useSearchParams } from 'next/navigation';
 import { api } from '~/trpc/react';
 import { GetCommentTreeInputSchema } from '~/type';
