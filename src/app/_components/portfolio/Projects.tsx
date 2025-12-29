@@ -25,7 +25,7 @@ export default function Projects() {
   return (
     <section className="flex flex-col gap-2 sm:gap-2 md:gap-3 lg:gap-4 xl:gap-5">
       <span className="text-gray-300 text-lg font-semibold">Projects</span>
-      <div className="flex gap-2 lg:gap-4">
+      <div className="grid grid-cols-2 gap-2 lg:gap-4">
         <Project
           url="https://www.showplayer.net"
           title="Tonytonyshopper"
