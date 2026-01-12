@@ -20,8 +20,8 @@ export default function Services() {
           title="Basic: Website/Blog"
           price="$150"
           features={[
-            'Pages: home, admin, login, custom x1',
-            'Revisions x1',
+            // 'Pages: home, admin, login, custom x1',
+            'Revisions x3',
             // '7 days delivery',
             'Content upload',
             'Social media icons',
@@ -32,11 +32,11 @@ export default function Services() {
         />
         <Service
           serviceId="standard"
-          title="Standard: Web App"
+          title="Standard: Webapp/E-commerce"
           price="$400"
           features={[
-            'Pages: home, admin, login, payment, custom x3',
-            'Revisions x3',
+            // 'Pages: home, admin, login, payment, custom x3',
+            'Revisions x5',
             // '14 days delivery',
             'Everything in Basic, plus:',
             'Payment integration',
