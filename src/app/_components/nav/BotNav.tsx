@@ -1,7 +1,7 @@
 import { BiLogoGmail } from 'react-icons/bi';
 import { FaGithub, FaInstagram, FaLinkedin } from 'react-icons/fa6';
 
-export default function BotNac() {
+export default function BotNav() {
   return (
     <nav className="px-3 max-w-2xl h-14 border-t-1 border-gray-600 mx-auto">
       <div className="flex w-full h-full items-center justify-end gap-3 md:gap-3">
