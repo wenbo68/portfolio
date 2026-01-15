@@ -23,7 +23,7 @@ interface UpdateReplyFields {
   setIsEditing: Dispatch<SetStateAction<boolean>>;
   handleUpdate: ({
     e,
-    id,
+    commentId: id,
     type,
     selectedPackage,
     rating,
@@ -144,7 +144,7 @@ export default function WriteReply({
           updateInput
             ? updateInput.handleUpdate({
                 e,
-                id: updateInput.id,
+                commentId: updateInput.id,
                 type: 'reply',
                 selectedPackage: undefined,
                 rating: undefined,

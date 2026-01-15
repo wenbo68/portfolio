@@ -28,7 +28,7 @@ interface UpdateReviewFields {
   setIsEditing: Dispatch<SetStateAction<boolean>>;
   handleUpdate: ({
     e,
-    id,
+    commentId,
     type,
     selectedPackage,
     rating,
@@ -187,7 +187,7 @@ export default function WriteReview({
           updateInput
             ? updateInput.handleUpdate({
                 e,
-                id: updateInput.id,
+                commentId: updateInput.id,
                 type: 'review',
                 selectedPackage,
                 rating,

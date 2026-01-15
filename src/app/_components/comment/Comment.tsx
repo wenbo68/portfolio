@@ -4,16 +4,20 @@ import { useEffect, useRef, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import type { CommentTree, UpdateCommentInput } from '~/type';
-import StarRating from '../rating/StarRating';
+import StarRating from './rating/StarRating';
 import { api } from '~/trpc/react';
-import WriteReply from '../write-form/WriteReply';
-import WriteReview from '../write-form/WriteReview';
+import WriteOrUpdateReply from './write-or-update-form/WriteOrUpdateReply';
 import { TbDotsVertical } from 'react-icons/tb';
 import { useMutationState } from '@tanstack/react-query';
 import { dequal } from 'dequal';
-import toast from 'react-hot-toast';
+// import toast from "react-hot-toast";
+// import { useProductContext } from '~/app/_contexts/ProductProvider';
+import WriteOrUpdateReview from './write-or-update-form/WriteOrUpdateReview';
+import { customToast } from '~/app/_components/Toast';
+// import { useMediaModalStore } from '~/app/_hooks/useMediaModalStore';
+import { FaPlay } from 'react-icons/fa';
 
-export default function ReviewOrReply({
+export default function Comment({
   comment,
   className,
 }: {
@@ -21,6 +25,8 @@ export default function ReviewOrReply({
   className?: string;
 }) {
   const { data: session } = useSession();
+  // const { productId } = useProductContext();
+  // const openMediaModal = useMediaModalStore((state) => state.open);
   const utils = api.useUtils();
 
   const [showDropdown, setShowDropdown] = useState(false);
@@ -28,7 +34,7 @@ export default function ReviewOrReply({
   const [isWritingReply, setIsWritingReply] = useState(false);
 
   const [updateError, setUpdateError] = useState('');
-  const [deleteError, setDeleteError] = useState('');
+  // const [deleteError, setDeleteError] = useState("");
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -50,109 +56,83 @@ export default function ReviewOrReply({
     };
   }, []);
 
+  const invalidateQueries = async () => {
+    void utils.comment.getAverageRating.invalidate();
+    await utils.comment.getCommentTree.invalidate();
+    // await utils.comment.getUserReviewForProduct.invalidate({ productId });
+  };
+
   const deleteMutation = api.comment.delete.useMutation({
-    // onMutate: async ({ id }) => {
-    //   await utils.comment.getCommentTree.cancel();
-    //   const previousComments = utils.comment.getAllAsTree.getData();
-
-    //   if (previousComments) {
-    //     // MODIFIED: Use the recursive helper to remove the comment
-    //     const updatedComments = removeCommentFromTree(previousComments, id);
-    //     utils.comment.getAllAsTree.setData(undefined, updatedComments);
-    //   }
-    //   return { previousComments };
-    // },
-    onError: (err, variables, context) => {
-      // // Roll back on error
-      // if (context?.previousComments) {
-      //   utils.comment.getAllAsTree.setData(undefined, context.previousComments);
-      // }
-      void utils.comment.getAverageRating.invalidate();
-      void utils.comment.getCommentTree.invalidate();
-
-      // console.error('Failed to delete comment:', err);
-      // setDeleteError('Failed to delete. Please try again.');
-      toast.custom((t) => (
-        <div className={`rounded bg-gray-800 px-4 py-2 text-sm text-gray-300`}>
-          Deletion failed. Please try again.
-        </div>
-      ));
+    onMutate: () => {
+      const toastId = customToast.loading('Deleting...');
+      return { toastId };
     },
-    onSuccess: () => {
-      void utils.comment.getAverageRating.invalidate();
-      void utils.comment.getCommentTree.invalidate();
-
-      toast.custom((t) => (
-        <div className={`rounded bg-gray-800 px-4 py-2 text-sm text-gray-300`}>
-          Deletion succeeded.
-        </div>
-      ));
+    onSuccess: async (data, input, context) => {
+      await invalidateQueries();
+      customToast.success('Delete succeeded.', context?.toastId);
     },
-    onSettled: () => {
-      // void utils.comment.getAverageRating.invalidate();
-      // void utils.comment.getCommentTree.invalidate();
+    onError: (err, input, context) => {
+      void invalidateQueries();
+      // setError("Failed to delete review. Please try again.");
+      customToast.error('Delete failed. Please try again.', context?.toastId);
+      // console.error("ReviewOrReply deleteMutation onError:", err);
     },
+    // onSettled: () => invalidateQueries(productId),
   });
 
   const handleDelete = () => {
-    // if (window.confirm('Are you sure you want to delete this comment?')) {
     deleteMutation.mutate({ id: comment.id });
-    // }
   };
 
   const updateMutation = api.comment.update.useMutation({
-    // onMutate: async (updatedComment) => {
-    //   await utils.comment.getAllAsTree.cancel();
-    //   const previousComments = utils.comment.getAllAsTree.getData();
-
-    //   setIsEditing(false);
-
-    //   if (previousComments) {
-    //     // MODIFIED: Use the recursive helper to update the comment
-    //     const updatedComments = updateCommentInTree(
-    //       previousComments,
-    //       updatedComment
-    //     );
-    //     utils.comment.getAllAsTree.setData(undefined, updatedComments);
-    //   }
-
-    //   return { previousComments };
+    // onMutate: () => {
+    //   const toastId = customToast.loading("Updating...");
+    //   return { toastId };
     // },
-    onError: (err, variables, context) => {
-      // if (context?.previousComments) {
-      //   utils.comment.getAllAsTree.setData(undefined, context.previousComments);
-      // }
-      void utils.comment.getAverageRating.invalidate();
-      void utils.comment.getCommentTree.invalidate();
-
-      // console.error('Failed to update comment:', err);
-      // setUpdateError('Failed to update. Please try again.');
-      toast.custom((t) => (
-        <div className={`rounded bg-gray-800 px-4 py-2 text-sm text-gray-300`}>
-          Update failed. Please try again.
-        </div>
-      ));
-    },
-    onSuccess: () => {
-      void utils.comment.getAverageRating.invalidate();
-      void utils.comment.getCommentTree.invalidate();
+    onSuccess: async (data, input, context) => {
+      await invalidateQueries();
+      // customToast.success("Update succeeded.", context?.toastId);
       setIsEditing(false);
-
-      toast.custom((t) => (
-        <div className={`rounded bg-gray-800 px-4 py-2 text-sm text-gray-300`}>
-          Update succeeded.
-        </div>
-      ));
     },
-    onSettled: () => {
-      // void utils.comment.getAverageRating.invalidate();
-      // void utils.comment.getCommentTree.invalidate();
+    onError: (err, input, context) => {
+      void invalidateQueries();
+      setUpdateError('Failed to update. Please try again.');
+      // customToast.error("Update failed. Please try again.", context?.toastId);
+      // console.error("ReviewOrReply updateMutation onError:", err);
     },
   });
 
+  // const handleUpdate = ({
+  //   e,
+  //   id,
+  //   type,
+  //   rating,
+  //   text,
+  // }: // media,
+  // UpdateCommentInput) => {
+  //   e.preventDefault();
+  //   if (type === 'review') {
+  //     if (rating === 0) {
+  //       setUpdateError('Please provide a rating.');
+  //       return;
+  //     }
+  //   }
+  //   if (text.trim() === '') {
+  //     setUpdateError('Please provide a valid comment.');
+  //     return;
+  //   }
+  //   setUpdateError('');
+  //   updateMutation.mutate({
+  //     id,
+  //     text,
+  //     rating,
+  //     // media,
+  //   });
+  // };
+
   const handleUpdate = ({
     e,
-    commentId: id,
+    commentId,
     type,
     selectedPackage,
     rating,
@@ -180,7 +160,7 @@ export default function ReviewOrReply({
     }
     setUpdateError('');
     updateMutation.mutate({
-      id,
+      id: commentId,
       text,
       rating,
       websiteUrl,
@@ -250,12 +230,8 @@ export default function ReviewOrReply({
     },
   ];
 
-  // // NEW: Check if the current comment is an optimistic one.
-  // // This assumes your optimistic IDs always start with "optimistic-".
-  // const isOptimistic = comment.id.startsWith('optimistic-');
-
   return (
-    <div className={`bg-gray-900 rounded ${className ?? ''}`}>
+    <div className={`bg-bg1 rounded ${className ?? ''}`}>
       {isEditing ? (
         comment.parentId ? (
           // rely edit mode: need an error here (bc handleUpdate is defined here)
@@ -263,9 +239,9 @@ export default function ReviewOrReply({
             {updateError && (
               <p className="text-sm text-red-400">{updateError}</p>
             )}
-            <WriteReply
+            <WriteOrUpdateReply
               updateInput={{
-                id: comment.id,
+                commentId: comment.id,
                 text: comment.text,
                 setIsEditing,
                 handleUpdate,
@@ -279,13 +255,15 @@ export default function ReviewOrReply({
             {updateError && (
               <p className="text-sm text-red-400">{updateError}</p>
             )}
-            <WriteReview
+            <WriteOrUpdateReview
+              // productId={productId}
               updateInput={{
-                id: comment.id,
+                commentId: comment.id,
                 package: comment.package ?? 'basic',
                 rating: comment.rating ?? 0,
                 websiteUrl: comment.websiteUrl ?? '',
                 text: comment.text,
+                // media: comment.media,
                 setIsEditing,
                 handleUpdate,
                 isUpdatePending: updateMutation.isPending,
@@ -296,24 +274,24 @@ export default function ReviewOrReply({
       ) : (
         // show review/reply
         <div className="flex flex-col gap-2">
-          {deleteError && <p className="text-sm text-red-400">{deleteError}</p>}
+          {/* {deleteError && <p className="text-sm text-red-400">{deleteError}</p>} */}
           <div className="flex gap-3">
             <Image
               src={comment.user.image ?? ''}
               alt={comment.user.name ?? 'User'}
               width={40}
               height={40}
-              className="w-8 h-8 rounded-full"
+              className="h-8 w-8 rounded-full"
             />
-            <div className="w-full flex flex-col gap-2">
+            <div className="flex w-full flex-col gap-2">
               <div className="flex flex-col">
                 <div className="flex justify-between">
                   {/* username */}
-                  <p className="text-sm font-semibold text-gray-400">
+                  <p className="text-text2 text-sm font-semibold">
                     {comment.user.name}
                   </p>
 
-                  <div className="relative flex gap-2 items-center">
+                  <div className="relative flex items-center gap-2">
                     {/* rating */}
                     {comment.rating ? (
                       <StarRating rating={comment.rating} interactive={false} />
@@ -328,7 +306,7 @@ export default function ReviewOrReply({
                     {showDropdown && (
                       <div
                         ref={dropdownRef}
-                        className="absolute top-full z-10 mt-2 w-full rounded bg-gray-800 p-2"
+                        className="bg-bg2 absolute top-full z-10 mt-2 w-full rounded p-1"
                       >
                         {/* only show dropdown if user is logged in and if the review/reply is not optimistic */}
                         {session ? (
@@ -339,18 +317,20 @@ export default function ReviewOrReply({
                                   key={option.label}
                                   type="button"
                                   onClick={option.onClick}
-                                  className={`w-full rounded p-2 text-left text-xs font-semibold hover:bg-gray-900 hover:text-blue-400 disabled:hover:bg-gray-800 disabled:hover:text-gray-400 transition-colors cursor-pointer`}
+                                  className={`hover:bg-bg1 disabled:hover:bg-bg2 disabled:hover:text-text2 hover:text-text-highlight w-full cursor-pointer rounded p-2 text-left text-xs font-semibold transition-colors disabled:cursor-default`}
                                 >
                                   {option.label}
                                 </button>
                               ) : null;
                             })
                           ) : (
-                            <p className="text-xs">Processing. Please wait.</p>
+                            <p className="px-2 py-1.5 text-left text-xs font-semibold">
+                              Processing...
+                            </p>
                           )
                         ) : (
-                          <p className="text-xs">
-                            Please login to interact with the reviews.
+                          <p className="px-2 py-1.5 text-left text-xs font-semibold">
+                            Please login first.
                           </p>
                         )}
                       </div>
@@ -358,52 +338,59 @@ export default function ReviewOrReply({
                   </div>
                 </div>
 
-                <div className="flex gap-3 text-xs text-gray-500">
-                  {/* time */}
-                  <span className="">
-                    {new Date(comment.createdAt).toLocaleDateString('ja-JP')}
-                  </span>
-                  {/* package */}
-                  {comment.package ? (
-                    <span className="capitalize">
-                      {comment.package} Package
+                {comment.createdAt && (
+                  <div className="text-text3 flex gap-3 text-xs">
+                    {/* time */}
+                    <span className="">
+                      {new Date(comment.createdAt).toLocaleDateString('ja-JP')}
                     </span>
-                  ) : null}
-                </div>
+                  </div>
+                )}
               </div>
-
-              {/* text */}
-              <p className="text-sm text-gray-400">{comment.text}</p>
-
-              {/* website link */}
-              {comment.websiteUrl && (
-                <a
-                  href={comment.websiteUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-cyan-400 hover:text-cyan-300 flex items-center gap-1"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    fill="currentColor"
-                    viewBox="0 0 16 16"
-                  >
-                    <path d="M6.354 5.5H4a3 3 0 0 0 0 6h3a3 3 0 0 0 2.83-4H9q-.13 0-.25.031A2 2 0 0 1 7 10.5H4a2 2 0 1 1 0-4h1.535c.218-.376.495-.714.82-1z" />
-                    <path d="M9 5.5a3 3 0 0 0-2.83 4h1.098A2 2 0 0 1 9 6.5h3a2 2 0 1 1 0 4h-1.535a4 4 0 0 1-.82 1H12a3 3 0 0 0 0-6z" />
-                  </svg>
-                  View Website
-                </a>
-              )}
             </div>
+          </div>
+          <div className="flex flex-col gap-2 pl-1.5">
+            {/* text */}
+            <p className="text-text2 text-sm">{comment.text}</p>
+            {/* media list */}
+            {/* {comment.media && comment.media.length > 0 && (
+              <div className="flex flex-wrap gap-1 sm:gap-2">
+                {comment.media.map((mediaItem, index) => (
+                  <div
+                    key={mediaItem.id}
+                    className="relative h-23 w-23 cursor-pointer overflow-hidden rounded border border-gray-700 bg-black hover:opacity-80 sm:h-29 sm:w-29"
+                    onClick={() => openMediaModal(comment.media, index)}
+                  >
+                    {mediaItem.type === 'video' ? (
+                      <>
+                        <video
+                          src={mediaItem.url}
+                          className="h-full w-full object-contain"
+                          // No controls here
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                          <FaPlay className="text-text1" />
+                        </div>
+                      </>
+                    ) : (
+                      <Image
+                        src={mediaItem.url}
+                        alt="Review media"
+                        fill
+                        className="object-contain"
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
+            )} */}
           </div>
         </div>
       )}
 
       {/* write reply form */}
       {isWritingReply && (
-        <WriteReply
+        <WriteOrUpdateReply
           addInput={{
             parentId: comment.id,
             setIsWritingReply,
@@ -415,11 +402,7 @@ export default function ReviewOrReply({
       {comment.replies && comment.replies.length > 0 && (
         <div className="border-l-2 border-gray-800">
           {comment.replies.map((reply) => (
-            <ReviewOrReply
-              key={reply.id}
-              comment={reply}
-              className="pl-10 mt-5"
-            />
+            <Comment key={reply.id} comment={reply} className="mt-5 pl-10" />
           ))}
         </div>
       )}

@@ -29,7 +29,7 @@ export default function Projects() {
         <Project
           url="https://tonytonyshopper.vercel.app"
           title="TonyTonyShopper"
-          description="Personal/small-scale E-commerce website"
+          description="(Ongoing) Personal/small-scale E-commerce website"
         />
         <Project
           url="https://www.showplayer.net"

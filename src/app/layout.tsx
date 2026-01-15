@@ -41,3 +41,5 @@ export default function RootLayout({
 }
 
 // allow admin to pin comments to top
+
+// selecting an option from review filters will trigger an url push, leading to a fetch, but the loading state doesn't include the filters, so the page will jump

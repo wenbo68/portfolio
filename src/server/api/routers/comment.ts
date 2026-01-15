@@ -25,28 +25,69 @@ import {
 } from '~/type';
 
 export const commentRouter = createTRPCRouter({
-  getAverageRating: publicProcedure.query(async ({ ctx }) => {
-    const result = await ctx.db
-      .select({
-        average: avg(comments.rating),
-        count: count(comments.rating),
-      })
-      .from(comments)
-      .where(isNotNull(comments.rating));
+  // getAverageRating: publicProcedure.query(async ({ ctx }) => {
+  //   const result = await ctx.db
+  //     .select({
+  //       average: avg(comments.rating),
+  //       count: count(comments.rating),
+  //     })
+  //     .from(comments)
+  //     .where(isNotNull(comments.rating));
 
-    const averageRating = result[0]?.average ?? null;
-    const ratingCount = result[0]?.count ?? 0;
+  //   const averageRating = result[0]?.average ?? null;
+  //   const ratingCount = result[0]?.count ?? 0;
+
+  //   return {
+  //     averageRating: averageRating ? parseFloat(averageRating) : 0,
+  //     ratingCount: ratingCount,
+  //   };
+  // }),
+
+  getAverageRating: publicProcedure.query(async ({ ctx }) => {
+    const [stats, distributionRaw] = await Promise.all([
+      // Average + count
+      ctx.db
+        .select({
+          average: avg(comments.rating),
+          count: count(comments.rating),
+        })
+        .from(comments)
+        .where(isNotNull(comments.rating)),
+
+      // Rating distribution
+      ctx.db
+        .select({
+          rating: comments.rating,
+          count: count(),
+        })
+        .from(comments)
+        .where(isNotNull(comments.rating))
+        .groupBy(comments.rating),
+    ]);
+
+    const averageRatingRaw = stats[0]?.average ?? null;
+    const ratingCount = stats[0]?.count ?? 0;
+
+    // Normalize distribution to ensure keys 1–5 exist
+    const ratingDistribution = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+
+    distributionRaw.forEach((row) => {
+      if (row.rating && row.rating >= 1 && row.rating <= 5) {
+        ratingDistribution[row.rating as 1 | 2 | 3 | 4 | 5] = row.count;
+      }
+    });
 
     return {
-      averageRating: averageRating ? parseFloat(averageRating) : 0,
-      ratingCount: ratingCount,
+      averageRating: averageRatingRaw ? parseFloat(averageRatingRaw) : 0,
+      ratingCount,
+      ratingDistribution,
     };
   }),
 
   getCommentTree: publicProcedure
     .input(GetCommentTreeInputSchema)
     .query(async ({ ctx, input }) => {
-      const { rating, packageType, order, page, pageSize } = input;
+      const { rating, packageType, sort, page, pageSize } = input;
 
       // ... (Steps 1, 2, and 3 for getting topLevelCommentIds are correct and unchanged)
       const conditions = [isNull(comments.parentId)];
@@ -70,7 +111,7 @@ export const commentRouter = createTRPCRouter({
       let topLevelOrderByClause;
       let finalOrderByClause;
 
-      switch (order) {
+      switch (sort) {
         case 'rating-desc':
           topLevelOrderByClause = desc(comments.rating); // Use Drizzle's desc() helper
           finalOrderByClause = sql`root_rating DESC, "createdAt" ASC`;

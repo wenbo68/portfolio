@@ -4,12 +4,21 @@ import {
   type comments,
   type PackageType,
 } from './server/db/schema';
+import type { colorClassMap } from './const';
+
+export type PillConfig = {
+  key: string;
+  label: string;
+  color: keyof typeof colorClassMap;
+  onRemove?: () => void;
+  className?: string;
+};
 
 // input type of getCommentTree procedure
 export const GetCommentTreeInputSchema = z.object({
   rating: z.array(z.number()).optional(),
   packageType: z.array(z.enum(packageEnum.enumValues)).optional(),
-  order: z.string().optional().default('created-desc'),
+  sort: z.string().optional().default('created-desc'),
   page: z.number().min(1),
   pageSize: z.number().min(1),
 });
@@ -34,7 +43,7 @@ export type CommentTree = CommentAndUser & {
 // used for handleUpdate() when clicking edit on review/reply
 export type UpdateCommentInput = {
   e: React.FormEvent;
-  id: string;
+  commentId: string;
   text: string;
 } & (
   | {
@@ -54,3 +63,9 @@ export type UpdateCommentInput = {
 // comment filter types
 export type FilterOption = { label: string; urlInput: string };
 export type FilterGroupOption = { groupLabel: string; options: FilterOption[] };
+
+// Define the shape of a single dropdown option
+export type DropdownOption = {
+  value: string;
+  label: string;
+};

@@ -1,8 +1,31 @@
 @import 'tailwindcss';
 
+/* First define the CSS custom properties */
+:root {
+  --gray-950: #030712;
+  --gray-900: #111827;
+  --gray-800: #1f2937;
+  --gray-700: #374151;
+  --gray-600: #4b5563;
+  --gray-500: #6b7280;
+  --gray-400: #9ca3af;
+  --gray-300: #d1d5db;
+  --blue-400: #60a5fa;
+}
 @theme {
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
     'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+
+  /* Reference the CSS custom properties */
+  --color-bg0: var(--gray-950);
+  --color-bg1: var(--gray-900);
+  --color-bg2: var(--gray-800);
+  --color-bg3: var(--gray-700);
+  --color-bg4: var(--gray-600);
+  --color-text1: var(--gray-300);
+  --color-text2: var(--gray-400);
+  --color-text3: var(--gray-500);
+  --color-text-highlight: var(--blue-400);
 }
 
 @layer base {
