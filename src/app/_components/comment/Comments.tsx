@@ -4,8 +4,6 @@ import { useState } from 'react';
 import { type CommentTree } from '~/type';
 import Comment from './Comment';
 import Pagination from './../pagination/Pagination';
-import ReviewFilters from './../filter/filters/ReviewFilters';
-import ReviewFilterPills from './../filter/filterPills/ReviewFilterPills';
 import { useSession } from 'next-auth/react';
 import { customToast } from '~/app/_components/Toast';
 import ReviewModal from './write-or-update-form/ReviewModal';
@@ -30,7 +28,6 @@ export default function Comments({
       customToast.error('Please login to write a review.');
       return;
     }
-    console.log('ReviewModal render, isOpen:', isReviewModalOpen);
     setIsReviewModalOpen(true);
   };
 
@@ -39,18 +36,11 @@ export default function Comments({
 
   const { commentTree, totalPages } = commentData;
 
-  // if (commentTree.length === 0) {
-  //   return (
-
-  //   );
-  // }
-
   return (
     <>
       {commentTree.length === 0 ? (
         <div className="flex flex-col gap-4">
-          <ReviewFilters />
-          <ReviewFilterPills />
+          {/* Removed Filters/Pills from here */}
           <div className="flex flex-col gap-0">
             <h2 className="text-center font-bold text-text1">
               No reviews found!
@@ -68,8 +58,7 @@ export default function Comments({
         </div>
       ) : (
         <div className="flex flex-col gap-4">
-          <ReviewFilters />
-          <ReviewFilterPills />
+          {/* Removed Filters/Pills from here */}
 
           {/* Review List */}
           <div className="flex flex-col gap-2 lg:gap-4">

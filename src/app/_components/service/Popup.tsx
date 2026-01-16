@@ -99,7 +99,7 @@ export default function Popup({
               options={paymentOptions}
               value={paymentType}
               onChange={(newValue) => setPaymentType(newValue as PaymentType)}
-              className="w-full"
+              // className="w-full"
             />
           </div>
 

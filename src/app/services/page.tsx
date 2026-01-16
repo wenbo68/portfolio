@@ -1,6 +1,6 @@
 import { api } from '~/trpc/server';
 import Services from '../_components/service/Services';
-import ReviewSection from '../_components/review/ReviewSection';
+// import ReviewSection from '../_components/review/ReviewSection';
 import RatingAndCommentSection from '../_components/comment/RatingAndCommentSection';
 
 export default async function Page() {
