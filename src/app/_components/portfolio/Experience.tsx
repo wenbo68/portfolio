@@ -26,12 +26,12 @@ export default function Experience() {
       </span>
       <div className="flex flex-col gap-2 lg:gap-4">
         <Exp title="AI Engineer" time="2024-2025" place="IoasiZ" />
-        <Exp title="Web Developer" time="2022-2024" place="Bank of China" />
         <Exp
-          title="Backend Java Developer"
-          time="2022-2022"
-          place="BeaconFire"
+          title="Full-Stack Developer"
+          time="2022-2024"
+          place="Bank of China"
         />
+        <Exp title="Backend Developer" time="2022-2022" place="BeaconFire" />
       </div>
     </section>
   );

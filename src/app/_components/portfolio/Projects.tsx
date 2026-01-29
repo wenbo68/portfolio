@@ -27,13 +27,18 @@ export default function Projects() {
       <span className="text-gray-300 text-lg font-semibold">Projects</span>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 lg:gap-4">
         <Project
+          url="https://paperparrot.vercel.app"
+          title="PaperParrot"
+          description="(Ongoing) Upload files and talk to an AI agent about them"
+        />
+        <Project
           url="https://tonytonyshopper.vercel.app"
           title="TonyTonyShopper"
           description="(Ongoing) Personal/small-scale E-commerce website"
         />
         <Project
           url="https://www.showplayer.net"
-          title="Showplayer"
+          title="ShowPlayer"
           description="Stream movies and tv shows for free"
         />
         <Project

@@ -45,8 +45,7 @@ export default function Education() {
         <Edu
           school="UC San Diego"
           time="2025-Present"
-          degree="M.S. in Computer Science (Artificial Intelligence)"
-          // thesis="Thesis: Scalable Graph Neural Networks on Heterogeneous Graphs"
+          degree="M.S. in Computer Science and Engineering (AI/Robotics Track)"
         />
         <Edu
           school="UNC Chapel Hill"
