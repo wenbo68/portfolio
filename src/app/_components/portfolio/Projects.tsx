@@ -27,6 +27,11 @@ export default function Projects() {
       <span className="text-gray-300 text-lg font-semibold">Projects</span>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 lg:gap-4">
         <Project
+          url="https://github.com/wenbo68/custom-stock-analysis"
+          title="CustomStockAnalysis"
+          description="(Ongoing) Choose a ticker and get intel + analysis on it"
+        />
+        <Project
           url="https://paperparrot.vercel.app"
           title="PaperParrot"
           description="(Ongoing) Upload files and talk to an AI agent about them"
@@ -34,10 +39,10 @@ export default function Projects() {
         <Project
           url="https://tonytonyshopper.vercel.app"
           title="TonyTonyShopper"
-          description="(Ongoing) Personal/small-scale E-commerce website"
+          description="Personal/small-scale E-commerce website"
         />
         <Project
-          url="https://www.showplayer.net"
+          url="https://showplayer.vercel.app"
           title="ShowPlayer"
           description="Stream movies and tv shows for free"
         />
