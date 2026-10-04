@@ -29,17 +29,17 @@ export default function Projects() {
         <Project
           url="https://github.com/wenbo68/custom-stock-analysis"
           title="CustomStockAnalysis"
-          description="(Ongoing) Choose a ticker and get intel + analysis on it"
+          description="Talk to an AI agent to get intel + analysis on a stock"
         />
         <Project
           url="https://paperparrot.vercel.app"
           title="PaperParrot"
-          description="(Ongoing) Upload files and talk to an AI agent about them"
+          description="(Aborted) Talk to an AI agent about uploaded files"
         />
         <Project
           url="https://tonytonyshopper.vercel.app"
           title="TonyTonyShopper"
-          description="Personal/small-scale E-commerce website"
+          description="Upload products for sale or browse products to buy"
         />
         <Project
           url="https://showplayer.vercel.app"

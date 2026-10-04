@@ -25,7 +25,7 @@ export default function Experience() {
         Work Experience
       </span>
       <div className="flex flex-col gap-2 lg:gap-4">
-        <Exp title="AI Engineer" time="2026-2026" place="SIJE" />
+        <Exp title="AI/AX Engineer" time="2026-2026" place="SIJE" />
         <Exp title="AI Engineer" time="2024-2025" place="IoasiZ" />
         <Exp
           title="Full-Stack Developer"
