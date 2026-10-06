@@ -44,12 +44,12 @@ export default function Education() {
       <div className="flex flex-col gap-2 lg:gap-4">
         <Edu
           school="UC San Diego"
-          time="2025-Present"
+          time="2025 - Leave of Absence (visa issues)"
           degree="M.S. in Computer Science and Engineering (AI/Robotics Track)"
         />
         <Edu
           school="UNC Chapel Hill"
-          time="2018-2022"
+          time="2018 - 2022"
           degree="B.S. in Computer Science & Neuroscience"
           thesis="Automated navigation of nanoparticles through mazes using computer-generated holography"
           supervisor="Dr. Zijie Yan, Dr. Jack Snoeyink"
